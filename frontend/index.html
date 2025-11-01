@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API calling</title>
+</head>
+<body>
+
+    <h1>API Calling Example</h1>
+    <pre id="output"></pre>
+    <button onclick="fetchData()">Fetch Data</button>
+
+    <script>
+        function fetchData() {
+            fetch('http://127.0.0.1:5000/message')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('output').textContent = 'Error: ' + error;
+                });
+        }
+    </script>
+    
+</body>
+</html>
