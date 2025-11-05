@@ -22,16 +22,27 @@ class LoginAPI(Resource):
             return {'message': 'Both email and password required!'}, 400
         user = User.query.get(email)
         if not user or user.password != password:
-            return {'message': 'Invalid credentials!'}, 400
+            return {'message': 'Invalid credentials!'}, 401
         token = create_access_token(identity=user.email)
         user = {'name': user.name, 'role': user.role, 'email': user.email}
-        return {'message': "Login success!", 'token': token, 'user': user}
+        return {'message': "Login success!", 'token': token, 'user': user}, 200
 api.add_resource(LoginAPI, '/login')
 
 class RegisterAPI(Resource):
     def post(self):
-        # logic to add user
-        return {'message': "Account created, login to continue..."}, 201
+        data = request.get_json()
+        email = data.get('email'); password = data.get('password')
+        if not email or not password:
+            return {'message':'Please provide email and password both'},400
+        # user = User.query.get('email')#.get can be used here asif we have email as primary key
+        user = User.query.filter_by(email=email).first()#using filter_by as email is a non primary field
+        if user:
+            return {'message':'User already exist, login to continue...'},409
+        new_user = User(name=data.get('name'), email=email, password=password)
+        # token = create_access_token(identity=user.email)
+        db.session.add(new_user); db.session.commit()
+        return {'message':'user created successfully!, login to continue...'}, 201
+api.add_resource(RegisterAPI,'/register')
 
 # user routes
 
