@@ -1,7 +1,9 @@
 from flask_restful import Api, Resource
 from flask import request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask_caching import Cache
 
+cache = Cache()
 api = Api()
 
 class HelloWorld(Resource):
@@ -45,10 +47,13 @@ class RegisterAPI(Resource):
 api.add_resource(RegisterAPI,'/register')
 
 # user routes
+import time
 
 class ItemAPI(Resource):
-    @jwt_required()
+    # @jwt_required()
+    @cache.cached(timeout=60, key_prefix='item_cache')
     def get(self, item_id=None):
+        time.sleep(6)
         if item_id:
             item = Item.query.get(item_id)
             if not item:
@@ -68,6 +73,7 @@ class ItemAPI(Resource):
         data = request.get_json()
         item = Item(name=data['name'], color=data['color'])
         db.session.add(item); db.session.commit()
+        cache.delete('item_cache')
         return {'message': 'item created'}, 201
     
     @jwt_required()
@@ -75,18 +81,19 @@ class ItemAPI(Resource):
         user = User.query.get(get_jwt_identity())
         if not user or user.role != 'admin':
             return {'message': "You're not authorized to access this!"}, 401
-
+        cache.delete('item_cache')
         return {'message': 'put received'}
-    @jwt_required()
+    # @jwt_required()
     def delete(self, item_id):
-        user = User.query.get(get_jwt_identity())
-        if not user or user.role != 'admin':
-            return {'message': "You're not authorized to access this!"}, 401
+        # user = User.query.get(get_jwt_identity())
+        # if not user or user.role != 'admin':
+        #     return {'message': "You're not authorized to access this!"}, 401
 
         item = Item.query.get(item_id)
         if not item:
             return {'message': 'item not found'}, 404
         db.session.delete(item); db.session.commit()
+        # cache.delete('item_cache')
         return {'message': 'deleted item'}
     
 api.add_resource(ItemAPI, '/items', '/items/<item_id>')

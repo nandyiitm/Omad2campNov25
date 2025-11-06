@@ -14,6 +14,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
 from models import db, User
 db.init_app(app)
 
+# caching config
+app.config['CACHE_TYPE'] = 'RedisCache'
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+from routes import cache
+cache.init_app(app)
+
 ## connecting to routes
 from routes import api
 api.init_app(app)
