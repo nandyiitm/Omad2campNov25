@@ -97,3 +97,12 @@ class ItemAPI(Resource):
         return {'message': 'deleted item'}
     
 api.add_resource(ItemAPI, '/items', '/items/<item_id>')
+
+
+
+class ReportGenerationAPI(Resource):
+    def get(self):
+        from celery_app import export_csv
+        export_csv.delay()
+        return {'message':"Export Initiated, please wait for mail!"}
+api.add_resource(ReportGenerationAPI, '/generate_report')

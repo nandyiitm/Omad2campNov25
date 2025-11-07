@@ -2,3 +2,5 @@ __pycache__*
 backend/instance
 backend/venv
 dump.rdb
+backend/celerybeat*
+backend/static/
